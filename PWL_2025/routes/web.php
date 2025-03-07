@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\AboutController;
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,10 +27,12 @@ Route::get('/world', function () {
     return 'World';
 });
 
-//Soal No 6 Praltikum 2
-Route::get('/', [PageController::class,'index']);
-Route::get('/about', [PageController::class, 'about']);
-Route::get('/articles/{id}', [PageController::class, 'articles']);
+//Soal No 7 Praltikum 2
+Route::get('/', [HomeController::class,'index']);
+
+Route::get('/about', [AboutController::class, 'about']);
+
+Route::get('/articles/{id}', [ArticleController::class, 'articles']);
 
 //Soal No 8 Praltikum 1
 Route::get('/user/{name}', function ($name) {
@@ -42,3 +48,15 @@ Route::get('/posts/{posts}/coments/{coments}', function ($postId, $comentId) {
 Route::get('/user/{name?}', function ($name = 'Jhon'){
     return 'Nama saya ' .$name;
 });
+
+//Soal no 9 Praktikum 2 
+Route::resource('photos', PhotoController::class);
+
+//Soal no 11 Praktikum 2
+Route::resource('photos', PhotoController::class)->only([
+    'index', 'show'
+]);
+
+Route::resource('photos', PhotoController::class)->except([
+    'create', 'store', 'update', 'destroy'
+]);

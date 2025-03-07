@@ -6,7 +6,8 @@ use Illuminate\Http\Request;
 
 class AboutController extends Controller
 {
-    public function index (){
-        return 'Selamat Datang';
+    public function about (){
+        return 'Fali Irham Maulana <br>
+        2341720121';
     }
 }
