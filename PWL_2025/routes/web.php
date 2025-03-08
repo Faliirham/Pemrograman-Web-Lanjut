@@ -60,3 +60,6 @@ Route::resource('photos', PhotoController::class)->only([
 Route::resource('photos', PhotoController::class)->except([
     'create', 'store', 'update', 'destroy'
 ]);
+
+//Soal no 2 $ 6 Praktikum 3
+Route::get('/greeting', [WelcomeController::class, 'greeting']);
