@@ -55,7 +55,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'http://localhost/Pemrograman-Web-Lanjut/PWL_POS/public'),
 
     'asset_url' => env('ASSET_URL'),
 
