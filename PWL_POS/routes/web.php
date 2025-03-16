@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Products;
 use App\Http\Controllers\User;
 use App\Http\Controllers\LevelController;
+use App\Http\Controllers\KategoriController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,3 +38,5 @@ Route::get('/user/{id}/name/{name}', [User::class, 'getUser']);
 Route::get('/penjualan', [Penjualan::class, 'DataPenjualan']);
 
 Route::get('/level', [LevelController::class, 'index']);
+
+Route::get('/kategori', [KategoriController::class, 'index']);
