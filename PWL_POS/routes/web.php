@@ -8,6 +8,7 @@ use App\Http\Controllers\Products;
 use App\Http\Controllers\User;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,3 +41,5 @@ Route::get('/penjualan', [Penjualan::class, 'DataPenjualan']);
 Route::get('/level', [LevelController::class, 'index']);
 
 Route::get('/kategori', [KategoriController::class, 'index']);
+
+Route::get('/user', [UserController::class, 'index']);
