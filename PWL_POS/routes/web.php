@@ -6,6 +6,7 @@ use App\Http\Controllers\Penjualan;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Products;
 use App\Http\Controllers\User;
+use App\Http\Controllers\LevelController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,3 +35,5 @@ Route::prefix('category')->group(function () {
 Route::get('/user/{id}/name/{name}', [User::class, 'getUser']);
 
 Route::get('/penjualan', [Penjualan::class, 'DataPenjualan']);
+
+Route::get('/level', [LevelController::class, 'index']);
