@@ -11,8 +11,9 @@ class LevelModel extends Model
     use HasFactory;
     protected $table = 'm_level'; // Nama tabel di database
     protected $primaryKey = 'level_id'; // Primary key
+    public $timestamps = false; // Jika tidak ada created_at & updated_at
 
-    protected $fillable = ['level_name']; 
+    protected $fillable = ['level_kode','level_nama']; 
 
     // Relasi One to One ke UserModel
     public function user():HasOne
