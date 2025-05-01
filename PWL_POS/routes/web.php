@@ -24,7 +24,7 @@ use App\Http\Controllers\WelcomeController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::pattern('id','[0-9');
+Route::pattern('id','[0-9]');
 
 Route::get('login', [AuthController::class, 'login'])->name('login');
 Route::post('login', [AuthController::class, 'postlogin']);
@@ -55,7 +55,7 @@ Route::middleware(['auth'])->group(function(){
     });
     
     
-    Route::middleware(['authorize:ADM'])->group(function () {
+    Route::middleware(['authorize:ADM01'])->group(function () {
         Route::get('/', [LevelController::class, 'index']); // Menampilkan halaman awal level
         Route::post('/list', [LevelController::class, 'list']); // Menampilkan data level dalam bentuk JSON untuk DataTables
         Route::get('/create_ajax', [LevelController::class, 'create_ajax']); // Menampilkan halaman form tambah level
@@ -94,20 +94,20 @@ Route::middleware(['auth'])->group(function(){
         Route::delete('/{id}', [SupplierController::class, 'destroy']); // Hapus supplier
       });
     
-    
-     Route::group(['prefix' => 'barang'], function () {
-        Route::get('/', [BarangController::class, 'index']); // Halaman awal barang
-       Route::post('/list', [BarangController::class, 'list']); // DataTables JSON
-       Route::get('/create_ajax', [BarangController::class, 'create_ajax']); // Form tambah barang
-       Route::post('/ajax', [BarangController::class, 'store_ajax']); // Simpan barang baru
-       Route::get('/{id}', [BarangController::class, 'show']); // Detail barang
-       Route::get('/{id}/edit_ajax', [BarangController::class, 'edit_ajax']); // Form edit barang
-       Route::put('/{id}/update_ajax', [BarangController::class, 'update_ajax']); // Update barang
-       Route::get('/{id}/delete_ajax', [BarangController::class, 'confirm_ajax']); // Konfirmasi hapus barang AJAX
-       Route::delete('/{id}/delete_ajax', [BarangController::class, 'delete_ajax']); // Hapus barang AJAX
-       Route::delete('/{id}', [BarangController::class, 'destroy']); // Hapus barang
+    Route::middleware(['authorize:ADM01,MNG'])->group(function () {
+        Route::group(['prefix' => 'barang'], function () {
+            Route::get('/', [BarangController::class, 'index']); // Halaman awal barang
+            Route::post('/list', [BarangController::class, 'list']); // DataTables JSON
+            Route::get('/create_ajax', [BarangController::class, 'create_ajax']); // Form tambah barang
+            Route::post('/ajax', [BarangController::class, 'store_ajax']); // Simpan barang baru
+            Route::get('/{id}', [BarangController::class, 'show']); // Detail barang
+            Route::get('/{id}/edit_ajax', [BarangController::class, 'edit_ajax']); // Form edit barang
+            Route::put('/{id}/update_ajax', [BarangController::class, 'update_ajax']); // Update barang
+            Route::get('/{id}/delete_ajax', [BarangController::class, 'confirm_ajax']); // Konfirmasi hapus barang AJAX
+            Route::delete('/{id}/delete_ajax', [BarangController::class, 'delete_ajax']); // Hapus barang AJAX
+            Route::delete('/{id}', [BarangController::class, 'destroy']); // Hapus barang
+        });
     });
-    
 });
 
 
