@@ -1,10 +1,10 @@
-@empty($kategori)
+@if(empty($kategori))
  <div id="modal-master" class="modal-dialog modal-lg" role="document">
      <div class="modal-content">
          <div class="modal-header">
              <h5 class="modal-title" id="exampleModalLabel">Kesalahan</h5>
-             <button type="button" class="close" data-dismiss="modal" >
-                 <span >&times;</span>
+             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                 <span aria-hidden="true">&times;</span>
              </button>
          </div>
          <div class="modal-body">
@@ -16,7 +16,7 @@
          </div>
      </div>
  </div>
- @else
+@else
  <form action="{{ url('/kategori/' . $kategori->kategori_id . '/delete_ajax') }}" method="POST" id="form-delete-kategori">
      @csrf
      @method('DELETE')
@@ -24,8 +24,8 @@
          <div class="modal-content">
              <div class="modal-header">
                  <h5 class="modal-title" id="exampleModalLabel">Hapus Kategori</h5>
-                 <button type="button" class="close" data-dismiss="modal" >
-                     <span >&times;</span>
+                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                     <span aria-hidden="true">&times;</span>
                  </button>
              </div>
              <div class="modal-body">
@@ -79,7 +79,9 @@
                                          title: 'Berhasil',
                                          text: response.message
                                      });
-                                     dataKategori.ajax.reload();
+                                     if (typeof dataKategori !== 'undefined') {
+                                         dataKategori.ajax.reload();
+                                     }
                                  } else {
                                      Swal.fire({
                                          icon: 'error',
@@ -87,6 +89,14 @@
                                          text: response.message
                                      });
                                  }
+                             },
+                             error: function(xhr, status, error) {
+                                 Swal.fire({
+                                     icon: 'error',
+                                     title: 'Terjadi Kesalahan',
+                                     text: 'Terjadi kesalahan pada server. Silakan coba lagi nanti.'
+                                 });
+                                 console.error(xhr.responseText);
                              }
                          });
                      }
@@ -96,4 +106,4 @@
          });
      });
  </script>
- @endempty
+@endif
