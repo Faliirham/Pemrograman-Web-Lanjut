@@ -9,6 +9,7 @@
  use Illuminate\Support\Facades\Hash;
  use Illuminate\Support\Facades\Validator;
  use PhpOffice\PhpSpreadsheet\IOFactory;
+ Use Barryvdh\DomPDF\Facade\Pdf;
  
  class BarangController extends Controller
  {
@@ -436,5 +437,21 @@
    
          $writer->save('php://output');
          exit;
+     }
+
+     public function export_pdf()
+     {
+        $barang = BarangModel::select('kategori_id','barang_kode','barang_nama','harga_beli','harga_jual')
+                ->orderBy('kategori_id')
+                ->with('kategori')
+                ->get();
+
+       // Use Barryvdh\DomPDF\Facade\Pdf
+       $pdf = PDF::loadView('barang.export_pdf', ['barang' => $barang]);
+       $pdf->setPaper('A4', 'potrait'); 
+       $pdf->setOptions(["isRemoteEnabled", true]);
+       $pdf->render();
+
+       return $pdf->stream('Data Barang_' . date('Y-m-d H:i:s') . '.pdf');
      }
 }
