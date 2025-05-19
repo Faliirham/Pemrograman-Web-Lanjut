@@ -6,6 +6,7 @@ use App\Models\KategoriModel;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class KategoriController extends Controller
 {
@@ -29,18 +30,22 @@ class KategoriController extends Controller
     // Mengambil data kategori dari database dalam format JSON untuk DataTables
 public function list(Request $request)
 {
-    $categories = KategoriModel::select('kategori_id', 'kategori_kode', 'kategori_nama');
+    $kategori = KategoriModel::select(
+        'kategori_id',
+        'kategori_kode',
+        'kategori_nama'
+    );
 
-    // Filter data kategori berdasarkan kategori_id jika ada
-    if ($request->kategori_id) {
-        $categories->where('kategori_id', $request->kategori_id);
+    $kategori_id = $request->input('kategori_id');
+    if (!empty($kategori_id)) {
+        $kategori->where('kategori_id', $kategori_id);
     }
 
-    return DataTables::of($categories)
+    return DataTables::of($kategori)
         ->addIndexColumn() // Menambahkan kolom index / nomor urut
         ->addColumn('aksi', function ($kategori) { // Menambahkan kolom aksi
-            $btn = '<button onclick="modalAction(\''.url('/kategori/' . $kategori->kategori_id).'\')" class="btn btn-info btn-sm">Detail</button> ';
-            $btn .= '<button onclick="modalAction(\''.url('/kategori/' . $kategori->kategori_id . '/edit_ajax').'\')" class="btn btn-warning btn-sm">Edit</button> ';
+            $btn = '<button onclick="modalAction(\'' . url('/kategori/' . $kategori->kategori_id ) . '\')" class="btn btn-info btn-sm">Detail</button> ';
+            $btn .= '<button onclick="modalAction(\'' . url('/kategori/' . $kategori->kategori_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
             $btn .= '<button onclick="modalAction(\''.url('/kategori/' . $kategori->kategori_id . '/delete_ajax').'\')" class="btn btn-danger btn-sm">Hapus</button> ';
             return $btn;
         })
@@ -216,7 +221,7 @@ public function list(Request $request)
     
     // Menampilkan form edit kategori
     public function edit_ajax(string $id) {
-        $kategori = KategoriModel::find($id);
+        $kategori = KategoriModel::findOrFail($id);
     
         return view('kategori.edit_ajax', ['kategori' => $kategori]);
     }
@@ -298,4 +303,66 @@ public function list(Request $request)
         // Jika bukan ajax request, redirect
         return redirect('/');
     }
+
+    public function import() 
+     { 
+         return view('kategori.import');  // Ganti tampilan dengan tampilan kategori
+     }
+ 
+     public function import_ajax(Request $request)
+     {
+         if ($request->ajax() || $request->wantsJson()) {
+             $rules = [
+                 'file_kategori' => ['required', 'mimes:xlsx', 'max:1024']  // Ganti 'file_level' menjadi 'file_kategori'
+             ];
+ 
+             $validator = Validator::make($request->all(), $rules);
+             if ($validator->fails()) {
+                 return response()->json([
+                     'status' => false,
+                     'message' => 'Validasi Gagal',
+                     'msgField' => $validator->errors()
+                 ]);
+             }
+ 
+             $file = $request->file('file_kategori');  // Ganti 'file_level' menjadi 'file_kategori'
+ 
+             $reader = IOFactory::createReader('Xlsx');
+             $reader->setReadDataOnly(true);
+             $spreadsheet = $reader->load($file->getRealPath());
+             $sheet = $spreadsheet->getActiveSheet();
+             $data = $sheet->toArray(null, false, true, true);
+ 
+             $insert = [];
+             if (count($data) > 1) {
+                 foreach ($data as $row => $value) {
+                     if ($row > 1) {
+                         // Pastikan kolom yang diimpor sesuai dengan kolom yang ada pada tabel m_kategori
+                         $insert[] = [
+                             'kategori_kode' => $value['A'],  // Pastikan kolom 'A' berisi kode kategori
+                             'kategori_nama' => $value['B'],  // Pastikan kolom 'B' berisi nama kategori
+                             'created_at' => now(),
+                             'updated_at' => now()  // Menambahkan updated_at jika diperlukan
+                         ];
+                     }
+                 }
+ 
+                 if (count($insert) > 0) {
+                     KategoriModel::insertOrIgnore($insert);  // Menggunakan insertOrIgnore agar data duplikat tidak ditambahkan
+                 }
+ 
+                 return response()->json([
+                     'status' => true,
+                     'message' => 'Data Kategori berhasil diimport'
+                 ]);
+             } else {
+                 return response()->json([
+                     'status' => false,
+                     'message' => 'Tidak ada data yang diimport'
+                 ]);
+             }
+         }
+ 
+         return redirect('/');
+     }
 }

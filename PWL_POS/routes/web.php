@@ -55,6 +55,10 @@ Route::middleware(['auth'])->group(function(){
             Route::delete('/{id}/delete_ajax', [UserController::class, 'delete_ajax']);// hapus data user ajax
             Route::put('/{id}', [UserController::class, 'update']);
             Route::delete('/{id}', [UserController::class, 'destroy']);
+            Route::get('/import', [UserController::class, 'import']); // menampilkan halaman form upload excel barang ajax
+            Route::post('/import_ajax', [UserController::class, 'import_ajax']); // menyimpan import excel barang ajax
+            Route::get('/export_excel', [UserController::class,'export_excel']); //export excel
+            Route::get('/export_pdf', [UserController::class,'export_pdf']); //export Pdf
         });
     });
     
@@ -71,6 +75,10 @@ Route::middleware(['auth'])->group(function(){
             Route::get('/{id}/delete_ajax', [LevelController::class, 'confirm_ajax']); // Tampilan form delete level AJAX
             Route::delete('/{id}/delete_ajax', [LevelController::class, 'delete_ajax']); // Hapus data level AJAX
             Route::delete('/{id}', [LevelController::class, 'destroy']); // Menghapus data level
+            Route::get('/import', [LevelController::class, 'import']); // menampilkan halaman form upload excel barang ajax
+            Route::post('/import_ajax', [LevelController::class, 'import_ajax']); // menyimpan import excel level ajax
+            Route::get('/export_excel', [LevelController::class,'export_excel']); //export excel
+            Route::get('/export_pdf', [LevelController::class,'export_pdf']); //export Pdf
             });
         });
     
@@ -86,6 +94,8 @@ Route::middleware(['auth'])->group(function(){
             Route::get('/{id}/delete_ajax', [KategoriController::class, 'confirm_ajax']); // Tampilan form delete kategori AJAX
             Route::delete('/{id}/delete_ajax', [KategoriController::class, 'delete_ajax']); // Hapus data kategori AJAX
             Route::delete('/{id}', [KategoriController::class, 'destroy']); // Menghapus data kategori
+            Route::get('/import', [KategoriController::class, 'import']); // menampilkan halaman form upload excel kategori ajax
+            Route::post('/import_ajax', [KategoriController::class, 'import_ajax']); // menyimpan import excel kategori ajax
         });
     });
 
@@ -101,6 +111,8 @@ Route::middleware(['auth'])->group(function(){
             Route::get('/{id}/delete_ajax', [SupplierController::class, 'confirm_ajax']); // Konfirmasi hapus supplier AJAX
             Route::delete('/{id}/delete_ajax', [SupplierController::class, 'delete_ajax']); // Hapus supplier AJAX
             Route::delete('/{id}', [SupplierController::class, 'destroy']); // Hapus supplier
+            Route::get('/import', [SupplierController::class, 'import']);// Import Supplier
+            Route::post('/import_ajax', [SupplierController::class, 'import_ajax']);// Form Import Supplier Excel
         });
     });
     

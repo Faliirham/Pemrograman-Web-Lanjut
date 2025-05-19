@@ -5,6 +5,7 @@
     <div class="card-header">
         <h3 class="card-title">{{ $page->title }}</h3>
         <div class="card-tools">
+            <button onclick="modalAction('{{ url('/kategori/import') }}')" class="btn btn-info">Import Kategori</button>
             <a class="btn btn-sm btn-primary mt-1" href="{{ url('kategori/create') }}">Tambah</a>
             <button class="btn btn-sm btn-success mt-1" data-url="{{ url('/kategori/create_ajax') }}" onclick="modalAction(this)">Tambah Ajax</button>
         </div>
@@ -45,8 +46,7 @@
         </table>
     </div>
 </div>
-<div id="myModal" class="modal fade animate shake" tabindex="-1" role="dialog" data-
-backdrop="static" data-keyboard="false" data-width="75%" aria-hidden="true"></div>
+<div id="myModal" class="modal fade animate shake" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" data-width="75%" aria-hidden="true"></div>
 @endsection
 
 @push('css')
@@ -63,6 +63,7 @@ backdrop="static" data-keyboard="false" data-width="75%" aria-hidden="true"></di
 var dataKategori;
     $(document).ready(function() {
         dataKategori = $('#table_kategori').DataTable({
+            processing: true,
             serverSide: true,
             ajax: {
                 "url": "{{ url('kategori/list') }}",
