@@ -61,8 +61,7 @@ Route::middleware(['auth'])->group(function(){
             Route::get('/export_pdf', [UserController::class,'export_pdf']); //export Pdf
         });
     });
-    
-    
+
     Route::middleware(['authorize:ADM'])->group(function () {
         Route::group(['prefix' => 'level'], function () {
             Route::get('/', [LevelController::class, 'index']); // Menampilkan halaman awal level
@@ -96,6 +95,7 @@ Route::middleware(['auth'])->group(function(){
             Route::delete('/{id}', [KategoriController::class, 'destroy']); // Menghapus data kategori
             Route::get('/import', [KategoriController::class, 'import']); // menampilkan halaman form upload excel kategori ajax
             Route::post('/import_ajax', [KategoriController::class, 'import_ajax']); // menyimpan import excel kategori ajax
+            Route::get('/export_excel', [KategoriController::class,'export_excel']); //export excel
         });
     });
 
@@ -113,6 +113,7 @@ Route::middleware(['auth'])->group(function(){
             Route::delete('/{id}', [SupplierController::class, 'destroy']); // Hapus supplier
             Route::get('/import', [SupplierController::class, 'import']);// Import Supplier
             Route::post('/import_ajax', [SupplierController::class, 'import_ajax']);// Form Import Supplier Excel
+            Route::get('/export_excel', [SupplierController::class, 'export_excel']); // export excel
         });
     });
     

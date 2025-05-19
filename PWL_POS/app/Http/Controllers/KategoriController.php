@@ -364,5 +364,56 @@ public function list(Request $request)
          }
  
          return redirect('/');
-     }
+    }
+
+    public function export_excel(){
+        // Ambil data kategori
+        $kategoris = KategoriModel::select('kategori_id', 'kategori_kode', 'kategori_nama', 'created_at')
+            ->orderBy('kategori_id')
+            ->get();
+
+        // Load library Spreadsheet
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set header kolom
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'Kode Kategori');
+        $sheet->setCellValue('C1', 'Nama Kategori');
+        $sheet->setCellValue('D1', 'Tanggal Dibuat');
+
+        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
+        $no = 1;
+        $baris = 2;
+
+        foreach ($kategoris as $kategori) {
+            $sheet->setCellValue('A' . $baris, $no);
+            $sheet->setCellValue('B' . $baris, $kategori->kategori_kode);
+            $sheet->setCellValue('C' . $baris, $kategori->kategori_nama);
+            $sheet->setCellValue('D' . $baris, $kategori->created_at);
+            $baris++;
+            $no++;
+        }
+
+        // Auto size kolom
+        foreach(range('A', 'D') as $columnID){
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        // Nama sheet
+        $sheet->setTitle('Data Kategori');
+
+        // Export ke browser
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $filename = 'Data Kategori ' . date('Y-m-d H-i-s') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+        header('Expires: 0');
+        header('Pragma: public');
+
+        $writer->save('php://output');
+        exit;
+    }
 }
