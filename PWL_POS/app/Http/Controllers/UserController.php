@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LevelModel;
 use App\Models\UserModel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Dotenv\Util\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -335,70 +336,86 @@ class UserController extends Controller
     }
 
     public function export_excel(){
-    // Ambil data user yang akan diexport
-    $users = UserModel::select('user_id', 'level_id', 'username', 'nama', 'password', 'created_at', 'updated_at')
+        // Ambil data user yang akan diexport
+        $users = UserModel::select('user_id', 'level_id', 'username', 'nama', 'password', 'created_at', 'updated_at')
+            ->orderBy('user_id')
+            ->with('level') // Menambahkan relasi dengan level
+            ->get();
+
+        // Load library excel
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet(); // Ambil sheet yang aktif
+
+        // Set header kolom
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'Kode Level');
+        $sheet->setCellValue('C1', 'Nama Level');
+        $sheet->setCellValue('D1', 'Username');
+        $sheet->setCellValue('E1', 'Nama');
+        $sheet->setCellValue('F1', 'Password');
+        $sheet->setCellValue('G1', 'Tanggal Dibuat');
+        $sheet->setCellValue('H1', 'Tanggal Update');
+
+        $sheet->getStyle('A1:H1')->getFont()->setBold(true); // Bold header
+        $no = 1; // Nomor data dimulai dari 1
+        $baris = 2; // Baris data dimulai dari baris ke 2
+
+        // Loop untuk menulis data user
+        foreach ($users as $key => $value) {
+            $sheet->setCellValue('A' . $baris, $no);
+            // Menambahkan Level Kode dan Nama Level
+            $sheet->setCellValue('B' . $baris, $value->level_id);
+            $sheet->setCellValue('C' . $baris, $value->level ? $value->level->level_nama : 'No Level');
+            $sheet->setCellValue('D' . $baris, $value->username);
+            $sheet->setCellValue('E' . $baris, $value->nama);
+            $sheet->setCellValue('F' . $baris, $value->password);
+            $sheet->setCellValue('G' . $baris, $value->created_at);
+            $sheet->setCellValue('H' . $baris, $value->upadte_at);
+            
+            $baris++;
+            $no++;
+        }
+
+        // Set auto size untuk kolom A sampai H
+        foreach(range('A', 'H') as $columnID){
+            $sheet->getColumnDimension($columnID)->setAutoSize(true); // Set auto size untuk kolom
+        }
+
+        // Set title sheet
+        $sheet->setTitle('Data User');
+
+        // Create writer dan tentukan format file
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $filename = 'Data User ' . date('Y-m-d H:i:s') . '.xlsx';
+
+        // Set header untuk download file
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('Cache-Control: cache, must-revalidate');
+        header('Pragma: public');
+
+        // Simpan file ke output
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function export_pdf(){
+        $user= UserModel::select('user_id', 'level_id', 'username', 'nama', 'password', 'created_at')
         ->orderBy('user_id')
-        ->with('level') // Menambahkan relasi dengan level
+        ->orderBy('level_id')
+        ->with('level')
         ->get();
 
-    // Load library excel
-    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet(); // Ambil sheet yang aktif
+        //use Barryvdh\DomPDF\Facade\Pdf;
+        $pdf = Pdf::loadView('user.export_pdf', ['user' => $user]);
+        $pdf->setPaper('a4','landscape'); //set ukuran kertas dan orientasi
+        $pdf->setOption("isRemoteEnabled", true); //set true jika ada gambar dari url
+        $pdf->render();
 
-    // Set header kolom
-    $sheet->setCellValue('A1', 'No');
-    $sheet->setCellValue('B1', 'Kode Level');
-    $sheet->setCellValue('C1', 'Nama Level');
-    $sheet->setCellValue('D1', 'Username');
-    $sheet->setCellValue('E1', 'Nama');
-    $sheet->setCellValue('F1', 'Password');
-    $sheet->setCellValue('G1', 'Tanggal Dibuat');
-    $sheet->setCellValue('H1', 'Tanggal Update');
-
-    $sheet->getStyle('A1:H1')->getFont()->setBold(true); // Bold header
-    $no = 1; // Nomor data dimulai dari 1
-    $baris = 2; // Baris data dimulai dari baris ke 2
-
-    // Loop untuk menulis data user
-    foreach ($users as $key => $value) {
-        $sheet->setCellValue('A' . $baris, $no);
-        // Menambahkan Level Kode dan Nama Level
-        $sheet->setCellValue('B' . $baris, $value->level_id);
-        $sheet->setCellValue('C' . $baris, $value->level ? $value->level->level_nama : 'No Level');
-        $sheet->setCellValue('D' . $baris, $value->username);
-        $sheet->setCellValue('E' . $baris, $value->nama);
-        $sheet->setCellValue('F' . $baris, $value->password);
-        $sheet->setCellValue('G' . $baris, $value->created_at);
-        $sheet->setCellValue('H' . $baris, $value->upadte_at);
-        
-        $baris++;
-        $no++;
+        return $pdf->stream('Data User '.date('Y-m-d H:i:s').'.pdf');
     }
-
-    // Set auto size untuk kolom A sampai H
-    foreach(range('A', 'H') as $columnID){
-        $sheet->getColumnDimension($columnID)->setAutoSize(true); // Set auto size untuk kolom
-    }
-
-    // Set title sheet
-    $sheet->setTitle('Data User');
-
-    // Create writer dan tentukan format file
-    $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
-    $filename = 'Data User ' . date('Y-m-d H:i:s') . '.xlsx';
-
-    // Set header untuk download file
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment;filename="' . $filename . '"');
-    header('Cache-Control: max-age=0');
-    header('Cache-Control: max-age=1');
-    header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-    header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
-    header('Cache-Control: cache, must-revalidate');
-    header('Pragma: public');
-
-    // Simpan file ke output
-    $writer->save('php://output');
-    exit;
-}
 }

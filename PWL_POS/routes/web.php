@@ -96,6 +96,7 @@ Route::middleware(['auth'])->group(function(){
             Route::get('/import', [KategoriController::class, 'import']); // menampilkan halaman form upload excel kategori ajax
             Route::post('/import_ajax', [KategoriController::class, 'import_ajax']); // menyimpan import excel kategori ajax
             Route::get('/export_excel', [KategoriController::class,'export_excel']); //export excel
+            Route::get('/export_pdf', [KategoriController::class, 'export_pdf']);
         });
     });
 
@@ -114,6 +115,7 @@ Route::middleware(['auth'])->group(function(){
             Route::get('/import', [SupplierController::class, 'import']);// Import Supplier
             Route::post('/import_ajax', [SupplierController::class, 'import_ajax']);// Form Import Supplier Excel
             Route::get('/export_excel', [SupplierController::class, 'export_excel']); // export excel
+            Route::get('/export_pdf', [SupplierController::class, 'export_pdf']); // export pdf
         });
     });
     

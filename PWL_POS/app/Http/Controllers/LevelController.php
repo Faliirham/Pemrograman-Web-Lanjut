@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LevelModel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
@@ -348,58 +349,71 @@ public function create_ajax() {
         return redirect('/');
     }
     public function export_excel(){
-    // Ambil data level yang akan diexport
-    $level = LevelModel::select('level_id', 'level_kode', 'level_nama', 'created_at')
+        // Ambil data level yang akan diexport
+        $level = LevelModel::select('level_id', 'level_kode', 'level_nama', 'created_at')
+            ->orderBy('level_id')
+            ->get();
+
+        // Load library excel
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet(); // Ambil sheet yang aktif
+
+        // Set header kolom
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'Kode Level');
+        $sheet->setCellValue('C1', 'Nama Level');
+        $sheet->setCellValue('D1', 'Tanggal Dibuat');
+
+        $sheet->getStyle('A1:D1')->getFont()->setBold(true); // Bold header
+        $no = 1; // Nomor data dimulai dari 1
+        $baris = 2; // Baris data dimulai dari baris ke 2
+
+        // Loop untuk menulis data level
+        foreach ($level as $key => $value) {
+            $sheet->setCellValue('A' . $baris, $no);
+            $sheet->setCellValue('B' . $baris, $value->level_kode);
+            $sheet->setCellValue('C' . $baris, $value->level_nama);
+            $sheet->setCellValue('D' . $baris, $value->created_at); // Tanggal dibuat
+            $baris++;
+            $no++;
+        }
+
+        // Set auto size untuk kolom A sampai D
+        foreach(range('A', 'D') as $columnID){
+            $sheet->getColumnDimension($columnID)->setAutoSize(true); // Set auto size untuk kolom
+        }
+
+        // Set title sheet
+        $sheet->setTitle('Data Level');
+
+        // Create writer dan tentukan format file
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $filename = 'Data Level ' . date('Y-m-d H:i:s') . '.xlsx';
+
+        // Set header untuk download file
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('Cache-Control: cache, must-revalidate');
+        header('Pragma: public');
+
+        $writer->save('php://output');
+        exit;
+    }
+    public function export_pdf(){
+        $level = LevelModel::select('level_id', 'level_kode', 'level_nama', 'created_at')
         ->orderBy('level_id')
         ->get();
 
-    // Load library excel
-    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet(); // Ambil sheet yang aktif
+        //use Barryvdh\DomPDF\Facade\Pdf;
+        $pdf = Pdf::loadView('level.export_pdf', ['level' => $level]);
+        $pdf->setPaper('a4','potrait'); //set ukuran kertas dan orientasi
+        $pdf->setOption("isRemoteEnabled", true); //set true jika ada gambar dari url
+        $pdf->render();
 
-    // Set header kolom
-    $sheet->setCellValue('A1', 'No');
-    $sheet->setCellValue('B1', 'Kode Level');
-    $sheet->setCellValue('C1', 'Nama Level');
-    $sheet->setCellValue('D1', 'Tanggal Dibuat');
-
-    $sheet->getStyle('A1:D1')->getFont()->setBold(true); // Bold header
-    $no = 1; // Nomor data dimulai dari 1
-    $baris = 2; // Baris data dimulai dari baris ke 2
-
-    // Loop untuk menulis data level
-    foreach ($level as $key => $value) {
-        $sheet->setCellValue('A' . $baris, $no);
-        $sheet->setCellValue('B' . $baris, $value->level_kode);
-        $sheet->setCellValue('C' . $baris, $value->level_nama);
-        $sheet->setCellValue('D' . $baris, $value->created_at); // Tanggal dibuat
-        $baris++;
-        $no++;
+        return $pdf->stream('Data Level '.date('Y-m-d H:i:s').'.pdf');
     }
-
-    // Set auto size untuk kolom A sampai D
-    foreach(range('A', 'D') as $columnID){
-        $sheet->getColumnDimension($columnID)->setAutoSize(true); // Set auto size untuk kolom
-    }
-
-    // Set title sheet
-    $sheet->setTitle('Data Level');
-
-    // Create writer dan tentukan format file
-    $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
-    $filename = 'Data Level ' . date('Y-m-d H:i:s') . '.xlsx';
-
-    // Set header untuk download file
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment;filename="' . $filename . '"');
-    header('Cache-Control: max-age=0');
-    header('Cache-Control: max-age=1');
-    header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-    header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
-    header('Cache-Control: cache, must-revalidate');
-    header('Pragma: public');
-
-    $writer->save('php://output');
-    exit;
-}
 }
