@@ -10,6 +10,7 @@ use App\Http\Controllers\Products;
 use App\Http\Controllers\User;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WelcomeController;
@@ -60,6 +61,12 @@ Route::middleware(['auth'])->group(function(){
             Route::get('/export_excel', [UserController::class,'export_excel']); //export excel
             Route::get('/export_pdf', [UserController::class,'export_pdf']); //export Pdf
         });
+    });
+
+    Route::prefix('profile')->middleware('authorize:ADM,MNG,STF')->group(function () {
+        Route::get('/', [ProfileController::class, 'index'])->name('profile');
+        Route::post('/upload', [ProfileController::class, 'upload'])->name('profile.upload');
+        Route::post('/upload_ajax', [ProfileController::class, 'upload_ajax']);
     });
 
     Route::middleware(['authorize:ADM'])->group(function () {

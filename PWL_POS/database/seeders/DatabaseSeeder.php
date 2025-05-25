@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
             KategoriSeeder::class,
             SupplierSeeder::class,
             BarangSeeder::class,
+            LevelSeeder::class,
+            UserSeeder::class,
             StokSeeder::class,
             PenjualanSeeder::class,
             PenjualanDetailSeeder::class,
