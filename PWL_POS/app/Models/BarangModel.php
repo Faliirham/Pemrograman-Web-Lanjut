@@ -13,7 +13,7 @@
      protected $primaryKey = 'barang_id'; // Primary key
      public $timestamps = true; // Karena ada kolom created_at & updated_at
      
-     protected $fillable = ['kategori_id', 'barang_kode', 'barang_nama', 'harga_beli', 'harga_jual'];
+     protected $fillable = ['kategori_id', 'barang_kode', 'barang_nama', 'harga_beli', 'harga_jual','image'];
  
      // Relasi dengan KategoriModel (One to Many - satu kategori bisa memiliki banyak barang)
      public function kategori()
