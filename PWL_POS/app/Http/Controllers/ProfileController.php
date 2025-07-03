@@ -32,55 +32,55 @@ class ProfileController extends Controller
     }
 
     public function upload_ajax(Request $request)
-{
-    if ($request->ajax() || $request->wantsJson()) {
-        // Validasi file
-        $validator = Validator::make($request->all(), [
-            'foto_profile' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:2048']
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Validasi gagal.',
-                'msgField' => $validator->errors()
+    {
+        if ($request->ajax() || $request->wantsJson()) {
+            // Validasi file
+            $validator = Validator::make($request->all(), [
+                'foto_profile' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:8192']
             ]);
-        }
 
-        try {
-            // Cek apakah user login
-            if (!Auth::check()) {
+            if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'User belum login.'
+                    'message' => 'Validasi gagal.',
+                    'msgField' => $validator->errors()
                 ]);
             }
 
-            // Ambil file dan beri nama unik
-            $file = $request->file('foto_profile');
-            $imageName = time() . '.' . $file->getClientOriginalExtension();
+            try {
+                // Cek apakah user login
+                if (!Auth::check()) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'User belum login.'
+                    ]);
+                }
 
-            // Simpan ke storage/app/public/foto_profil
-            $file->storeAs('public/foto_profil', $imageName);
+                // Ambil file dan beri nama unik
+                $file = $request->file('foto_profile');
+                $imageName = time() . '.' . $file->getClientOriginalExtension();
 
-            // Update field profile_photo di database
-            UserModel::find(Auth::id())->update([
-                'foto' => $imageName
-            ]);
+                // Simpan ke storage/app/public/foto_profil
+                $file->storeAs('public/foto_profil', $imageName);
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Upload berhasil.',
-                'image' => $imageName
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ]);
+                // Update field profile_photo di database
+                UserModel::find(Auth::id())->update([
+                    'foto' => $imageName
+                ]);
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Upload berhasil.',
+                    'image' => $imageName
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                ]);
+            }
         }
-    }
 
-    return redirect('/profile');
-}
+        return redirect('/profile');
+    }
 }
